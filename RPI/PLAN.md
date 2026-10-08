@@ -6,30 +6,23 @@ This document outlines the architecture, step-by-step implementation plan, and e
 
 ## 🎯 Architecture Overview
 
-```
- ┌─────────────────────────────────┐
- │     Raspberry Pi Pico W         │
- │  (BLE Peripheral: "RPi-Pico")   │
- │   - BMP280 Temperature Sensor   │
- │   - Characteristic: 0x2A6E      │
- └────────────────┬────────────────┘
-                  │
-                  │ BLE Wireless Connection
-                  ▼
- ┌─────────────────────────────────┐
- │       Raspberry Pi 3B+          │
- │     (BLE Central Client)        │
- │   - Bleak Python Async BLE      │
- └────────────────┬────────────────┘
-                  │
-                  ▼ Data Pipeline
- ┌─────────────────────────────────────────────────┐
- │              Visualization Engine               │
- ├────────────────────────┬────────────────────────┤
- │  Option A: Matplotlib  │  Option B: MQTT        │
- │  (Local Real-time      │  (ThingSpeak Cloud     │
- │   Plotter - Easiest)   │   Dashboard)           │
- └────────────────────────┴────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph PICO["Raspberry Pi Pico W (Peripheral: 'RPi-Pico')"]
+        BMP["BMP280 Sensor"] -->|"I2C Read"| PICO_BLE["aioble Peripheral (GATT 0x181A)"]
+        PICO_BLE --> CHAR["Temperature Characteristic (0x2A6E)"]
+    end
+
+    CHAR -->|"BLE Wireless Connection"| RPI_CLIENT["Bleak Central Client"]
+
+    subgraph RPI["Raspberry Pi 3B+ (Central Node)"]
+        RPI_CLIENT --> QUEUE["Telemetry Data Queue"]
+        
+        subgraph VIS["Visualization Engine"]
+            QUEUE --> OPT_A["Option A: Matplotlib (Local Real-Time Plotter)"]
+            QUEUE --> OPT_B["Option B: MQTT (ThingSpeak Cloud Dashboard)"]
+        end
+    end
 ```
 
 ---

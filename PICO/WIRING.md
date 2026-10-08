@@ -19,24 +19,30 @@ This document details the wiring, pinouts, and I2C connection diagram between th
 
 ## 🔌 Connection Diagram
 
-```
-                 Raspberry Pi Pico W
-             ┌─────────────────────────┐
-             │ [USB]                   │
- 3V3 (OUT) ──┤ Pin 36            GP4 ──┼──> SDA (BMP280)
-       GND ──┤ Pin 38            GP5 ──┼──> SCL (BMP280)
-             │                         │
-             └─────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph PICO["Raspberry Pi Pico W"]
+        P_3V3["Pin 36 (3V3 OUT)"]
+        P_GND["Pin 38 (GND)"]
+        P_GP4["Pin 6 (GP4 / I2C0 SDA)"]
+        P_GP5["Pin 7 (GP5 / I2C0 SCL)"]
+    end
 
-                     BMP280 Sensor
-             ┌─────────────────────────┐
-             │ VCC  ├──────────────────┼──< 3V3 (Pico W)
-             │ GND  ├──────────────────┼──< GND (Pico W)
-             │ SCL  ├──────────────────┼──< GP5 / Pin 7
-             │ SDA  ├──────────────────┼──< GP4 / Pin 6
-             │ CSB  ├─[Optional 3V3]───│ (Enables I2C)
-             │ SDO  ├─[Optional GND]───│ (Sets addr 0x76)
-             └─────────────────────────┘
+    subgraph BMP["BMP280 Sensor Breakout"]
+        B_VCC["VCC"]
+        B_GND["GND"]
+        B_SDA["SDA"]
+        B_SCL["SCL"]
+        B_CSB["CSB (Optional)"]
+        B_SDO["SDO (Optional)"]
+    end
+
+    P_3V3 -->|"3.3V Power"| B_VCC
+    P_GND -->|"Ground"| B_GND
+    P_GP4 <-->|"I2C Data"| B_SDA
+    P_GP5 -->|"I2C Clock"| B_SCL
+    P_3V3 -.->|"Enables I2C Mode"| B_CSB
+    P_GND -.->|"Sets Addr 0x76"| B_SDO
 ```
 
 ---
